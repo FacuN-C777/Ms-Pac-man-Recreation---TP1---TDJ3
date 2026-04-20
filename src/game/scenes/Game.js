@@ -1,28 +1,54 @@
-import { Scene } from 'phaser';
+import { Scene } from "phaser";
+import * as Phaser from "phaser";
+import Player from "../classes/Player";
 
-export class Game extends Scene
-{
-    constructor ()
-    {
-        super('Game');
+export class Game extends Phaser.Scene {
+  constructor() {
+    super("Game");
+    this.player = null;
+    this.cursors = null;
+    this.wallLayer = null;
+  }
+
+  create() {
+    //start with maze creation (walls & teleports)
+    const map = this.make.tilemap({ key: "mapMaze1" });
+    const paredes = map.addTilesetImage("Mazmora 1 - Limpia", "wallTiles");
+    const puntos = map.addTilesetImage("Puntos", "dotTiles");
+    const wallLayer = map.createLayer("Paredes", paredes, 0, 0);
+    const dotsLayer = map.createLayer("Puntos", puntos, 0, 0);
+    const spawnsLayer = map.getObjectLayer("Spawns");
+
+    wallLayer.setCollisionByProperty({ Colision: true });
+    this.wallLayer = wallLayer;
+
+    //Now come the points for collection, score & power-ups
+
+    //Now the texts, lives & such (UI)
+
+    //Now character & enemies instances
+    const playerSpawn = map.findObject(
+      "Spawns",
+      (obj) => obj.name === "MsPacMan",
+    );
+    this.player = new Player(this, playerSpawn.x, playerSpawn.y, "player");
+    this.add.existing(this.player);
+
+    // Setup cursors for input
+    this.cursors = this.input.keyboard.createCursorKeys();
+
+    //Now collisions & such
+    this.physics.add.collider(this.player, wallLayer);
+
+    //Miscallenous and other thing down here
+    this.input.once("pointerdown", () => {
+      this.scene.start("MainMenu");
+    });
+  }
+
+  update(time, delta) {
+    if (this.player) {
+      this.player.handleMovement(delta, this.cursors, this.wallLayer);
     }
-
-    create ()
-    {
-        this.cameras.main.setBackgroundColor(0x00ff00);
-
-        this.add.image(512, 384, 'background').setAlpha(0.5);
-
-        this.add.text(512, 384, 'Make something fun!\nand share it with us:\nsupport@phaser.io', {
-            fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 8,
-            align: 'center'
-        }).setOrigin(0.5);
-
-        this.input.once('pointerdown', () => {
-
-            this.scene.start('GameOver');
-
-        });
-    }
+  }
 }
