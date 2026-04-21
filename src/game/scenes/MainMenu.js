@@ -22,8 +22,6 @@ export class MainMenu extends Scene {
         fontFamily: '"Press Start 2P"',
         fontSize: "8px",
         color: "#ffffff",
-        stroke: "#000000",
-        strokeThickness: 8,
         align: "center",
       })
       .setOrigin(0.5);

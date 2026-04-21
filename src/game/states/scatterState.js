@@ -14,6 +14,10 @@ export class ScatterState extends GhostState {
     this.targetY = targetY;
   }
 
+  get speed() {
+    return 75; // 3/4 of base speed (100)
+  }
+
   get targetPosition() {
     return { x: this.targetX, y: this.targetY };
   }

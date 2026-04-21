@@ -13,6 +13,10 @@ export class ChaseState extends GhostState {
     this.hero = hero;
   }
 
+  get speed() {
+    return 75; // 3/4 of base speed (100)
+  }
+
   get targetPosition() {
     return {
       x: this.hero.x,

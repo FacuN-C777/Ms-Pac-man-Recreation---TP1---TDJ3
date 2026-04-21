@@ -44,12 +44,18 @@ export class Ghost extends Phaser.Physics.Arcade.Sprite {
     this.hero = hero;
     this.board = board;
 
+    // Store actual spawn point (different from scatter target)
+    this.spawnX = this.x;
+    this.spawnY = this.y;
+
     this.stateMachine = new GhostStateMachine(
       this,
       board,
       hero,
       scatterX,
       scatterY,
+      this.spawnX,
+      this.spawnY,
     );
     this.stateMachine.init();
   }
@@ -82,6 +88,26 @@ export class Ghost extends Phaser.Physics.Arcade.Sprite {
 
   isFrightened() {
     return this.stateMachine ? this.stateMachine.isFrightened() : false;
+  }
+
+  isEaten() {
+    return this.stateMachine ? this.stateMachine.isEaten() : false;
+  }
+
+  eat() {
+    if (this.stateMachine) {
+      this.stateMachine.eat();
+    }
+  }
+
+  hasReachedSpawn() {
+    return this.stateMachine ? this.stateMachine.hasReachedSpawn() : false;
+  }
+
+  returnToPreviousState() {
+    if (this.stateMachine) {
+      this.stateMachine.returnToPreviousState();
+    }
   }
 
   preUpdate(t, dt) {
@@ -229,7 +255,11 @@ export class Ghost extends Phaser.Physics.Arcade.Sprite {
   updateAnimation() {
     const vel = this.body.velocity;
 
-    if (this.isFrightened()) {
+    if (this.isEaten()) {
+      // Eaten state - use ghostEaten animation set
+      const direction = this.getDirectionFromVelocity(vel);
+      GhostAnimations.playEaten(this, direction);
+    } else if (this.isFrightened()) {
       GhostAnimations.playFrightened(this);
     } else if (Math.abs(vel.x) > 0.1 || Math.abs(vel.y) > 0.1) {
       // Derive direction from velocity (same as Player class)

@@ -2,14 +2,17 @@ import * as Phaser from "phaser";
 import { ScatterState } from "./scatterState.js";
 import { ChaseState } from "./chaseState.js";
 import { FrightenedState } from "./frightenedState.js";
+import { EatenState } from "./eatenState.js";
 
 export class GhostStateMachine {
-  constructor(ghost, board, hero, scatterX, scatterY) {
+  constructor(ghost, board, hero, scatterX, scatterY, spawnX, spawnY) {
     this.ghost = ghost;
     this.board = board;
     this.hero = hero;
     this.scatterX = scatterX;
     this.scatterY = scatterY;
+    this.spawnX = spawnX;
+    this.spawnY = spawnY;
 
     this.states = {};
     this.currentState = null;
@@ -18,6 +21,8 @@ export class GhostStateMachine {
     this.scatterTimer = 0;
     this.hasTransitionedToChase = false;
     this.scatterDuration = 30000;
+    this.frightTimer = 0;
+    this.frightDuration = 8000;
 
     this.previousStateName = null;
   }
@@ -31,6 +36,12 @@ export class GhostStateMachine {
     );
     this.states.chase = new ChaseState(this.hero, this.ghost, this.board);
     this.states.frightened = new FrightenedState(this.ghost, this.board);
+    this.states.eaten = new EatenState(
+      this.ghost,
+      this.board,
+      this.spawnX,
+      this.spawnY,
+    );
 
     this.setState("scatter");
   }
@@ -64,29 +75,16 @@ export class GhostStateMachine {
     this.currentState.enter();
   }
 
-  /**
-   * Get the current state's movement speed
-   * @returns {number}
-   */
   get speed() {
     return this.currentState ? this.currentState.speed : 0;
   }
 
-  /**
-   * Get the current state's target position (for visualization)
-   * @returns {{x: number, y: number}}
-   */
   get targetPosition() {
     return this.currentState
       ? this.currentState.targetPosition
       : { x: this.ghost.x, y: this.ghost.y };
   }
 
-  /**
-   * Have the current state pick a direction
-   * @param {boolean} forceNewDirection - If true, try to avoid the current direction
-   * @returns {number} Direction enum value
-   */
   pickDirection(forceNewDirection = false) {
     if (!this.currentState) {
       return 4; // Direction.None
@@ -94,10 +92,6 @@ export class GhostStateMachine {
     return this.currentState.pickDirection(forceNewDirection);
   }
 
-  /**
-   * Update the state machine (handles timer for scatter->chase transition)
-   * @param {number} dt - Delta time in ms
-   */
   update(dt) {
     // Handle scatter timer (only if not yet transitioned to chase and not frightened)
     if (!this.hasTransitionedToChase && this.currentStateName === "scatter") {
@@ -105,6 +99,13 @@ export class GhostStateMachine {
       if (this.scatterTimer >= this.scatterDuration) {
         this.setState("chase");
         this.hasTransitionedToChase = true;
+      }
+    }
+    if (this.currentStateName === "frightened") {
+      this.frightTimer += dt;
+      if (this.frightTimer >= this.frightDuration) {
+        this.unfrighten();
+        this.frightTimer = 0;
       }
     }
   }
@@ -117,8 +118,45 @@ export class GhostStateMachine {
   }
 
   /**
-   * Return to previous state after frightened mode ends
+   * Called when ghost is eaten (player in powered state catches ghost)
+   * Adds 200 points and transitions to eaten state
    */
+  eat() {
+    // Add 200 points to score
+    if (this.ghost.scene && this.ghost.scene.gameManager) {
+      this.ghost.scene.gameManager.addScore(200);
+      // Update score display if it exists
+      if (this.ghost.scene.scoreText) {
+        this.ghost.scene.scoreText.setText(
+          "Score: " + this.ghost.scene.gameManager.getScore(),
+        );
+      }
+    }
+
+    // Transition to eaten state - target becomes spawn point
+    this.setState("eaten");
+  }
+
+  /**
+   * Check if ghost is in eaten state
+   */
+  isEaten() {
+    return this.currentStateName === "eaten";
+  }
+
+  /**
+   * Check if ghost has reached spawn point while in eaten state
+   */
+  hasReachedSpawn() {
+    if (
+      this.currentStateName === "eaten" &&
+      this.currentState.hasReachedSpawn
+    ) {
+      return this.currentState.hasReachedSpawn();
+    }
+    return false;
+  }
+
   unfrighten() {
     // Return to chase if we've already transitioned, otherwise go back to scatter
     if (this.hasTransitionedToChase) {
@@ -129,9 +167,13 @@ export class GhostStateMachine {
   }
 
   /**
-   * Check if currently in frightened mode
-   * @returns {boolean}
+   * Return to previous state after being eaten and reaching spawn
+   * Reuses the same logic as unfrighten
    */
+  returnToPreviousState() {
+    this.unfrighten();
+  }
+
   isFrightened() {
     return this.currentStateName === "frightened";
   }

@@ -8,7 +8,7 @@ class GameManager {
     this.playerLives = 3;
     this.score = 0;
     this.difficulty = 1;
-    this.GameManager.instance = this;
+    GameManager.instance = this;
   }
 
   static getInstance() {
@@ -24,7 +24,15 @@ class GameManager {
   }
 
   loseLives() {
-    this.playerLives -= amount;
+    this.playerLives -= 1;
+  }
+
+  getLives() {
+    return this.playerLives;
+  }
+
+  resetLives() {
+    this.playerLives = 3;
   }
 
   addScore(amount) {

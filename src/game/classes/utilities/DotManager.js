@@ -13,27 +13,27 @@ export class DotManager {
     this.powerDots = null; // Group for power dots
     this.totalDots = 0;
     this.collectedDots = 0;
+    this.score = 0;
   }
 
   createFromTilemap(dotsLayer, tileset) {
     // Create small dots (tile ID 898)
     const smallDots = dotsLayer.createFromTiles(898, -1, {
-      key: "tiles",
-      frame: "Punto.png",
-      origin: 0,
+      key: "dot",
+      origin: -0.5, // Center the sprite anchor
     });
 
     this.dots = this.scene.physics.add.group();
     smallDots.forEach((dot) => {
       this.dots.add(dot);
       const body = dot.body;
-      body.setCircle(4, 12, 12);
+      // Center the circle on the 8x8 tile: offset = -radius
+      body.setCircle(4, -2, -2);
     });
 
     // Create power dots (tile ID 926)
     const powerDots = dotsLayer.createFromTiles(926, -1, {
-      key: "tiles",
-      frame: "PuntoPower.png",
+      key: "powerDot",
       origin: 0,
     });
 
@@ -41,13 +41,14 @@ export class DotManager {
     powerDots.forEach((dot) => {
       this.PowerDots.add(dot);
       const body = dot.body;
-      body.setCircle(8, 8, 8);
+      // Center the circle on the 8x8 tile: offset = -radius
+      body.setCircle(8, -4, -4);
 
       // Animate power dots (pulsing effect)
       this.scene.tweens.add({
         targets: dot,
         alpha: 0,
-        duration: 1000,
+        duration: 500,
         yoyo: true,
         repeat: -1,
       });
