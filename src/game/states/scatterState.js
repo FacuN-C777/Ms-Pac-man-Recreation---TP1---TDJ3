@@ -1,3 +1,4 @@
+import * as Phaser from "phaser";
 import { GhostState } from "./ghostState.js";
 import {
   Direction,
@@ -17,13 +18,22 @@ export class ScatterState extends GhostState {
     return { x: this.targetX, y: this.targetY };
   }
 
-  pickDirection() {
+  pickDirection(forceNewDirection = false) {
     const backwardsDirection = getOppositeDirection(
       this.ghost.currentDirection,
     );
-    const directions = getOrderedDirections().filter(
-      (dir) => dir !== backwardsDirection,
-    );
+
+    // If current direction is None (initial state), don't filter any directions
+    // If forceNewDirection is true, also filter out the current direction
+    let directions = getOrderedDirections();
+    if (backwardsDirection !== Direction.None) {
+      directions = directions.filter((dir) => dir !== backwardsDirection);
+    }
+    if (forceNewDirection && this.ghost.currentDirection !== Direction.None) {
+      directions = directions.filter(
+        (dir) => dir !== this.ghost.currentDirection,
+      );
+    }
 
     return this._determineBestDirection(
       this.ghost.x,
@@ -41,8 +51,10 @@ export class ScatterState extends GhostState {
     for (const dir of directions) {
       const position = positionInDirection(x, y, dir);
 
-      // Check for wall collision
-      if (this.board.getTileAtWorldXY(position.x, position.y)) {
+      // Check for wall collision - only block if Colision is explicitly true
+      // This matches Phaser's setCollisionByProperty({ Colision: true }) behavior
+      const tile = this.board.getTileAtWorldXY(position.x, position.y);
+      if (tile && tile.properties?.Colision === true) {
         continue;
       }
 

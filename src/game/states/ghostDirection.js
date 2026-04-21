@@ -25,7 +25,7 @@ export function getOppositeDirection(direction) {
   }
 }
 
-export const TileSize = 16;
+export const TileSize = 8;
 
 export function positionInDirection(x, y, direction) {
   switch (direction) {

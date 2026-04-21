@@ -106,7 +106,7 @@ export class Preloader extends Scene {
     //Now the enemies' animations
     //First when scared(Player powered-up)
     this.anims.create({
-      key: "ghostFightened",
+      key: "ghostFrightened",
       frames: [
         { key: "ghosts", frame: 32 },
         { key: "ghosts", frame: 33 },

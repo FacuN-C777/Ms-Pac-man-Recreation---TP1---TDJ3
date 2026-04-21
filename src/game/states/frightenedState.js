@@ -1,3 +1,4 @@
+import * as Phaser from "phaser";
 import { GhostState } from "./ghostState.js";
 import {
   Direction,
@@ -34,15 +35,20 @@ export class FrightenedState extends GhostState {
     const backwardsDirection = getOppositeDirection(
       this.ghost.currentDirection,
     );
-    const validDirections = getOrderedDirections().filter(
-      (dir) => dir !== backwardsDirection,
-    );
+
+    // If current direction is None (initial state), don't filter any directions
+    const validDirections =
+      backwardsDirection === Direction.None
+        ? getOrderedDirections()
+        : getOrderedDirections().filter((dir) => dir !== backwardsDirection);
 
     // Filter out directions that lead to walls
+    // Only block if Colision is explicitly true (matches Phaser's collision logic)
     const availableDirections = [];
     for (const dir of validDirections) {
       const position = positionInDirection(this.ghost.x, this.ghost.y, dir);
-      if (!this.board.getTileAtWorldXY(position.x, position.y)) {
+      const tile = this.board.getTileAtWorldXY(position.x, position.y);
+      if (!tile || tile.properties?.Colision !== true) {
         availableDirections.push(dir);
       }
     }
@@ -54,7 +60,8 @@ export class FrightenedState extends GhostState {
         this.ghost.y,
         backwardsDirection,
       );
-      if (!this.board.getTileAtWorldXY(backPos.x, backPos.y)) {
+      const backTile = this.board.getTileAtWorldXY(backPos.x, backPos.y);
+      if (!backTile || backTile.properties?.Colision !== true) {
         return backwardsDirection;
       }
       return Direction.None;

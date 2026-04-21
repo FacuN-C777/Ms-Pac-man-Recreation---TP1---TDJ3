@@ -1,3 +1,4 @@
+import * as Phaser from "phaser";
 export class GhostState {
   constructor(ghost, board) {
     this.ghost = ghost;

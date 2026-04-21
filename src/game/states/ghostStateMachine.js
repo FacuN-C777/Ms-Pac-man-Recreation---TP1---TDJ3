@@ -1,3 +1,4 @@
+import * as Phaser from "phaser";
 import { ScatterState } from "./scatterState.js";
 import { ChaseState } from "./chaseState.js";
 import { FrightenedState } from "./frightenedState.js";
@@ -83,13 +84,14 @@ export class GhostStateMachine {
 
   /**
    * Have the current state pick a direction
+   * @param {boolean} forceNewDirection - If true, try to avoid the current direction
    * @returns {number} Direction enum value
    */
-  pickDirection() {
+  pickDirection(forceNewDirection = false) {
     if (!this.currentState) {
       return 4; // Direction.None
     }
-    return this.currentState.pickDirection();
+    return this.currentState.pickDirection(forceNewDirection);
   }
 
   /**
