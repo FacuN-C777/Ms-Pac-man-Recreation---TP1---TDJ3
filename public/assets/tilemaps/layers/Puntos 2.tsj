@@ -1,5 +1,5 @@
 { "columns":28,
- "image":"..\/..\/..\/..\/..\/..\/..\/..\/..\/Ms. Pac-Man Sprites De-atlased\/Archivos Originales\/Mapas\/Mazmora 1.png",
+ "image":"..\/..\/..\/..\/..\/..\/..\/..\/..\/Ms. Pac-Man Sprites De-atlased\/Archivos Originales\/Mapas\/Mazmora 2.png",
  "imageheight":248,
  "imagewidth":224,
  "margin":0,
@@ -10,7 +10,7 @@
  "tileheight":8,
  "tiles":[
         {
-         "id":29,
+         "id":113,
          "properties":[
                 {
                  "name":"Collectable",
@@ -19,7 +19,7 @@
                 }]
         }, 
         {
-         "id":57,
+         "id":114,
          "properties":[
                 {
                  "name":"Collectable",
@@ -33,6 +33,7 @@
                 }]
         }],
  "tilewidth":8,
+ "transparentcolor":"#000000",
  "type":"tileset",
  "version":"1.10"
 }

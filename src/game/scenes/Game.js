@@ -82,7 +82,7 @@ export class Game extends Phaser.Scene {
 
     this.blinky.init(this.player, wallLayer, 224, 0);
     this.pinky.init(this.player, wallLayer, 224, 248);
-    this.inky.init(this.player, wallLayer, 0, 0);
+    this.inky.init(this.player, wallLayer, 0, 0, this.blinky);
     this.sue.init(this.player, wallLayer, 0, 248);
     this.add.existing(this.blinky);
     this.add.existing(this.pinky);

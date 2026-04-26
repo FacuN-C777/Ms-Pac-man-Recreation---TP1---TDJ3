@@ -1,11 +1,24 @@
 import * as Phaser from "phaser";
 import { ScatterState } from "./scatterState.js";
 import { ChaseState } from "./chaseState.js";
+import { FlankState } from "./flankState.js";
+import { PlayfullChaseState } from "./playfullChaseState.js";
+import { CutoffState } from "./cutoffState.js";
 import { FrightenedState } from "./frightenedState.js";
 import { EatenState } from "./eatenState.js";
 
 export class GhostStateMachine {
-  constructor(ghost, board, hero, scatterX, scatterY, spawnX, spawnY) {
+  constructor(
+    ghost,
+    board,
+    hero,
+    scatterX,
+    scatterY,
+    spawnX,
+    spawnY,
+    ghostName = "",
+    blinky = null,
+  ) {
     this.ghost = ghost;
     this.board = board;
     this.hero = hero;
@@ -13,6 +26,8 @@ export class GhostStateMachine {
     this.scatterY = scatterY;
     this.spawnX = spawnX;
     this.spawnY = spawnY;
+    this.ghostName = ghostName;
+    this.blinky = blinky;
 
     this.states = {};
     this.currentState = null;
@@ -34,7 +49,31 @@ export class GhostStateMachine {
       this.ghost,
       this.board,
     );
-    this.states.chase = new ChaseState(this.hero, this.ghost, this.board);
+    // Each ghost has its unique chase behavior
+    if (this.ghostName === "blinky") {
+      // Blinky uses standard ChaseState
+      this.states.chase = new ChaseState(this.hero, this.ghost, this.board);
+    } else if (this.ghostName === "pinky") {
+      // Pinky uses FlankState - targets 2 tiles ahead
+      this.states.chase = new FlankState(this.hero, this.ghost, this.board);
+    } else if (this.ghostName === "inky") {
+      // Inky uses CutoffState - uses Blinky as reference for ambush targeting
+      this.states.chase = new CutoffState(
+        this.hero,
+        this.ghost,
+        this.board,
+        this.blinky,
+      );
+    } else if (this.ghostName === "sue") {
+      // Sue uses PlayfullChaseState - playful proximity-based behavior
+      this.states.chase = new PlayfullChaseState(
+        this.hero,
+        this.ghost,
+        this.board,
+        this.scatterX,
+        this.scatterY,
+      );
+    }
     this.states.frightened = new FrightenedState(this.ghost, this.board);
     this.states.eaten = new EatenState(
       this.ghost,

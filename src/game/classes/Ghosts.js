@@ -40,7 +40,7 @@ export class Ghost extends Phaser.Physics.Arcade.Sprite {
     this.movementSpeed = 75;
   }
 
-  init(hero, board, scatterX, scatterY) {
+  init(hero, board, scatterX, scatterY, blinky = null) {
     this.hero = hero;
     this.board = board;
 
@@ -56,6 +56,8 @@ export class Ghost extends Phaser.Physics.Arcade.Sprite {
       scatterY,
       this.spawnX,
       this.spawnY,
+      this.ghostName,
+      blinky,
     );
     this.stateMachine.init();
   }
