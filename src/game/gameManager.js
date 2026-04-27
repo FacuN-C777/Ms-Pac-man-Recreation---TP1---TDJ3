@@ -7,7 +7,7 @@ class GameManager {
     }
     this.playerLives = 3;
     this.score = 0;
-    this.difficulty = 1;
+    this.difficulty = 1; // 1 = Easy, 2 = Hard
     GameManager.instance = this;
   }
 
@@ -48,11 +48,21 @@ class GameManager {
   }
 
   setDifficulty(difficulty) {
+    // 1 = Easy (30s scatter, ghosts frighten)
+    // 2 = Hard (5s scatter, ghosts don't frighten)
     this.difficulty = difficulty;
   }
 
   getDifficulty() {
     return this.difficulty;
+  }
+
+  isEasy() {
+    return this.difficulty === 1;
+  }
+
+  isHard() {
+    return this.difficulty === 2;
   }
 }
 

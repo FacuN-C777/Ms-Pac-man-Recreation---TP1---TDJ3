@@ -6,6 +6,7 @@ import { PlayfullChaseState } from "./playfullChaseState.js";
 import { CutoffState } from "./cutoffState.js";
 import { FrightenedState } from "./frightenedState.js";
 import { EatenState } from "./eatenState.js";
+import GameManager from "../gameManager.js";
 
 export class GhostStateMachine {
   constructor(
@@ -35,7 +36,9 @@ export class GhostStateMachine {
 
     this.scatterTimer = 0;
     this.hasTransitionedToChase = false;
-    this.scatterDuration = 30000;
+    // Set scatter duration based on difficulty: Easy=30s, Hard=5s
+    const gameManager = GameManager.getInstance();
+    this.scatterDuration = gameManager.isHard() ? 5000 : 30000;
     this.frightTimer = 0;
     this.frightDuration = 8000;
 

@@ -8,7 +8,7 @@ import { Direction } from "../states/ghostDirection.js";
 
 export class Game extends Phaser.Scene {
   constructor() {
-    super("Game");
+    super("GameHard");
     this.player = null;
     this.cursors = null;
     this.wallLayer = null;
@@ -50,7 +50,7 @@ export class Game extends Phaser.Scene {
 
     // Initialize GameManager and reset score for new game
     this.gameManager = GameManager.getInstance();
-    this.gameManager.setDifficulty(1); // Easy difficulty
+    this.gameManager.setDifficulty(2); // Hard difficulty
     this.gameManager.resetScore();
     this.gameManager.resetLives();
 
@@ -140,7 +140,7 @@ export class Game extends Phaser.Scene {
         this.dotManager.removeDot(dot);
         this.gameManager.addScore(50);
         this.scoreText.setText("Score: " + this.gameManager.getScore());
-        // On easy difficulty, ghosts become frightened
+        // On hard difficulty, ghosts do NOT become frightened
         if (this.gameManager.isEasy()) {
           this.blinky.frighten();
           this.pinky.frighten();

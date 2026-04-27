@@ -24,7 +24,7 @@ export class Preloader extends Scene {
     this.load.setPath("assets");
     this.load.image("logo", "logo.png");
     this.load.image("dot", "Punto.png");
-    this.load.image("powerDot", "PuntoPower.png");
+    this.load.image("powerDot", "Ajo_Power-Up.png");
 
     this.load.font(
       "Press Start 2P",
@@ -32,11 +32,11 @@ export class Preloader extends Scene {
       "truetype",
     );
 
-    this.load.spritesheet("player", "MsPacMan-SpriteSheet.png", {
+    this.load.spritesheet("player", "Player-Spritesheet.png", {
       frameWidth: 16,
       frameHeight: 16,
     });
-    this.load.spritesheet("ghosts", "Fantasmas-SpriteSheet.png", {
+    this.load.spritesheet("ghosts", "Bats-SpriteSheet.png", {
       frameWidth: 16,
       frameHeight: 16,
     });
@@ -58,6 +58,7 @@ export class Preloader extends Scene {
         { key: "player", frame: 6 },
         { key: "player", frame: 7 },
         { key: "player", frame: 8 },
+        { key: "player", frame: 7 },
       ],
       frameRate: 8,
       repeat: -1,
@@ -68,6 +69,7 @@ export class Preloader extends Scene {
         { key: "player", frame: 9 },
         { key: "player", frame: 10 },
         { key: "player", frame: 11 },
+        { key: "player", frame: 10 },
       ],
       frameRate: 8,
       repeat: -1,
@@ -78,6 +80,7 @@ export class Preloader extends Scene {
         { key: "player", frame: 0 },
         { key: "player", frame: 1 },
         { key: "player", frame: 2 },
+        { key: "player", frame: 1 },
       ],
       frameRate: 8,
       repeat: -1,
@@ -88,16 +91,7 @@ export class Preloader extends Scene {
         { key: "player", frame: 3 },
         { key: "player", frame: 4 },
         { key: "player", frame: 5 },
-      ],
-      frameRate: 8,
-      repeat: -1,
-    });
-    this.anims.create({
-      key: "playerRight",
-      frames: [
-        { key: "player", frame: 9 },
-        { key: "player", frame: 10 },
-        { key: "player", frame: 11 },
+        { key: "player", frame: 4 },
       ],
       frameRate: 8,
       repeat: -1,
@@ -119,19 +113,19 @@ export class Preloader extends Scene {
     //Then when they´re eaten
     this.anims.create({
       key: "ghostEatenLeft",
-      frames: [{ key: "ghosts", frame: 37 }],
+      frames: [{ key: "ghosts", frame: 38 }],
     });
     this.anims.create({
       key: "ghostEatenRight",
-      frames: [{ key: "ghosts", frame: 36 }],
+      frames: [{ key: "ghosts", frame: 39 }],
     });
     this.anims.create({
       key: "ghostEatenDown",
-      frames: [{ key: "ghosts", frame: 34 }],
+      frames: [{ key: "ghosts", frame: 36 }],
     });
     this.anims.create({
       key: "ghostEatenUp",
-      frames: [{ key: "ghosts", frame: 35 }],
+      frames: [{ key: "ghosts", frame: 37 }],
     });
     //Now Blinky´s animation's
     this.anims.create({
