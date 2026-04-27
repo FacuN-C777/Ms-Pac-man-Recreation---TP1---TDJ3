@@ -46,6 +46,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.playerState = PlayerState.Normal;
     this.poweredAccumulator = 0;
     this.playerAI = null;
+
+    // Audio tracking
+    this.walkSound = null;
+    this.isWalkSoundPlaying = false;
   }
 
   setAI(ai) {
@@ -159,6 +163,26 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         // No valid direction - stop
         this.setVelocity(0, 0);
         break;
+    }
+
+    // Manage walk sound - loop while moving, stop when still
+    const isMoving = vel.lengthSq() > 0.2;
+    if (isMoving && !this.isWalkSoundPlaying) {
+      // Start walk sound at 20% volume
+      if (!this.walkSound) {
+        this.walkSound = this.scene.sound.add("playerWalk", {
+          loop: true,
+          volume: 0.2,
+        });
+      }
+      this.walkSound.play();
+      this.isWalkSoundPlaying = true;
+    } else if (!isMoving && this.isWalkSoundPlaying) {
+      // Stop walk sound
+      if (this.walkSound) {
+        this.walkSound.stop();
+      }
+      this.isWalkSoundPlaying = false;
     }
 
     // Update animation - derive direction from velocity

@@ -14,6 +14,12 @@ export class DotManager {
     this.totalDots = 0;
     this.collectedDots = 0;
     this.score = 0;
+
+    // Callbacks for collectable spawning
+    this.onDotsReached70 = null;
+    this.onDotsReached170 = null;
+    this.milestoneReached70 = false;
+    this.milestoneReached170 = false;
   }
 
   createFromTilemap(dotsLayer, tileset) {
@@ -110,6 +116,27 @@ export class DotManager {
   removeDot(dot) {
     dot.destroy(true);
     this.collectedDots++;
+
+    // Check for milestone at 70 dots
+    if (this.collectedDots === 70 && !this.milestoneReached70) {
+      this.milestoneReached70 = true;
+      if (this.onDotsReached70) {
+        this.onDotsReached70();
+      }
+    }
+
+    // Check for milestone at 170 dots
+    if (this.collectedDots === 170 && !this.milestoneReached170) {
+      this.milestoneReached170 = true;
+      if (this.onDotsReached170) {
+        this.onDotsReached170();
+      }
+    }
+  }
+
+  setMilestoneCallbacks(onReached70, onReached170) {
+    this.onDotsReached70 = onReached70;
+    this.onDotsReached170 = onReached170;
   }
 
   getRemainingDots() {

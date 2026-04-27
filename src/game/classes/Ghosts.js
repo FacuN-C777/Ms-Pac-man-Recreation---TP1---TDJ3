@@ -38,6 +38,9 @@ export class Ghost extends Phaser.Physics.Arcade.Sprite {
 
     // Movement speed
     this.movementSpeed = 75;
+
+    // Audio tracking
+    this.currentStateSound = null;
   }
 
   init(hero, board, scatterX, scatterY, blinky = null) {
@@ -78,6 +81,15 @@ export class Ghost extends Phaser.Physics.Arcade.Sprite {
     if (this.stateMachine) {
       this.stateMachine.frighten();
       this.movementSpeed = 50;
+      // Play frightened sound (looping) at 10% volume
+      if (this.currentStateSound) {
+        this.currentStateSound.stop();
+      }
+      this.currentStateSound = this.scene.sound.add("enemyFrightened", {
+        loop: true,
+        volume: 0.2,
+      });
+      this.currentStateSound.play();
     }
   }
 
@@ -85,6 +97,11 @@ export class Ghost extends Phaser.Physics.Arcade.Sprite {
     if (this.stateMachine) {
       this.stateMachine.unfrighten();
       this.movementSpeed = 75;
+      // Stop frightened sound
+      if (this.currentStateSound) {
+        this.currentStateSound.stop();
+        this.currentStateSound = null;
+      }
     }
   }
 
@@ -99,6 +116,15 @@ export class Ghost extends Phaser.Physics.Arcade.Sprite {
   eat() {
     if (this.stateMachine) {
       this.stateMachine.eat();
+      // Stop any current state sound and play eaten sound (non-looping) at 20% volume
+      if (this.currentStateSound) {
+        this.currentStateSound.stop();
+      }
+      this.currentStateSound = this.scene.sound.add("enemyEaten", {
+        loop: false,
+        volume: 0.2,
+      });
+      this.currentStateSound.play();
     }
   }
 
@@ -109,6 +135,11 @@ export class Ghost extends Phaser.Physics.Arcade.Sprite {
   returnToPreviousState() {
     if (this.stateMachine) {
       this.stateMachine.returnToPreviousState();
+      // Stop eaten sound when returning
+      if (this.currentStateSound) {
+        this.currentStateSound.stop();
+        this.currentStateSound = null;
+      }
     }
   }
 

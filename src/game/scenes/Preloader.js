@@ -25,6 +25,9 @@ export class Preloader extends Scene {
     this.load.image("logo", "logo.png");
     this.load.image("dot", "Punto.png");
     this.load.image("powerDot", "Ajo_Power-Up.png");
+    this.load.image("holyWater", "Agua_Colectable.png");
+    this.load.image("crucifix", "Crucifico_Colecionable.png");
+    this.load.image("stake", "Estaca_Colectable.png");
 
     this.load.font(
       "Press Start 2P",
@@ -44,6 +47,19 @@ export class Preloader extends Scene {
     this.load.tilemapTiledJSON("mapMaze1", "tilemaps/Mapa Mazmora 1.json");
     this.load.image("wallTiles", "Mazmora 1 - Limpia.png");
     this.load.image("dotTiles", "Mazmora 1.png");
+    this.load.tilemapTiledJSON("mapMaze2", "tilemaps/Mapa Mazmorra 2.json");
+    this.load.image("wallTiles2", "Mazmora 2 - Limpia.png");
+    this.load.image("dotTiles2", "Mazmora 2.png");
+
+    this.load.audio("eatCollectable", "sounds/eatFruit.wav");
+    this.load.audio("enemyEaten", "sounds/enemyEaten.wav");
+    this.load.audio("enemyFrightened", "sounds/enemyFright.wav");
+    this.load.audio("menuSound", "sounds/menuStart.wav");
+    this.load.audio("playerDeath", "sounds/playerDeath.wav");
+    this.load.audio("playerEatEnemy", "sounds/playerEatEnemy.wav");
+    this.load.audio("playerEatPower", "sounds/PlayerEatPower.wav");
+    this.load.audio("playerWalk", "sounds/playerWalk.wav");
+    this.load.audio("startGame", "sounds/startGame.wav");
   }
 
   create() {

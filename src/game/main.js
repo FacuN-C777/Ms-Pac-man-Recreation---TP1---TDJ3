@@ -1,6 +1,6 @@
 import { Boot } from "./scenes/Boot";
 import { Game as MainGame } from "./scenes/Game";
-import { GameOver } from "./scenes/GameOver";
+import { GameHard } from "./scenes/GameHard";
 import { MainMenu } from "./scenes/MainMenu";
 import { Preloader } from "./scenes/Preloader";
 import * as Phaser from "phaser";
@@ -23,7 +23,7 @@ const config = {
     default: "arcade",
     arcade: { debug: false },
   },
-  scene: [Boot, Preloader, MainMenu, MainGame, GameOver],
+  scene: [Boot, Preloader, MainMenu, MainGame, GameHard],
 };
 
 const StartGame = (parent) => {

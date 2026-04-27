@@ -3,15 +3,19 @@ import * as Phaser from "phaser";
 import Player from "../classes/Player";
 import { Ghost } from "../classes/Ghosts";
 import { DotManager } from "../classes/utilities/DotManager";
+import { Collectable } from "../classes/Collectables";
 import GameManager from "../gameManager";
 import { Direction } from "../states/ghostDirection.js";
 
-export class Game extends Phaser.Scene {
+export class GameHard extends Phaser.Scene {
   constructor() {
     super("GameHard");
     this.player = null;
     this.cursors = null;
     this.wallLayer = null;
+    this.currentCollectable = null;
+    this.secondCollectableSpawned = false;
+    this.startGameSound = null;
   }
 
   create() {
@@ -20,8 +24,8 @@ export class Game extends Phaser.Scene {
     this.physics.world.drawDebug = true;*/
 
     //start with maze creation (walls & teleports)
-    const map = this.make.tilemap({ key: "mapMaze1" });
-    const paredes = map.addTilesetImage("Mazmora 1 - Limpia", "wallTiles");
+    const map = this.make.tilemap({ key: "mapMaze2" });
+    const paredes = map.addTilesetImage("Mazmorra 2", "wallTiles2");
     const puntos = map.addTilesetImage("Puntos", "dotTiles");
     const wallLayer = map.createLayer("Paredes", paredes, 0, 0);
     const dotsLayer = map.createLayer("Puntos", puntos, 0, 0);
@@ -34,6 +38,18 @@ export class Game extends Phaser.Scene {
     this.dotManager = new DotManager(this);
     this.dotManager.createFromTilemap(dotsLayer, puntos);
 
+    // Setup collectable spawn callbacks (at 70 and 170 dots)
+    this.dotManager.setMilestoneCallbacks(
+      () => this.spawnCollectable(),
+      () => {
+        // Only spawn second fruit if first one is gone
+        if (!this.currentCollectable || !this.currentCollectable.isOnScreen()) {
+          this.spawnCollectable();
+          this.secondCollectableSpawned = true;
+        }
+      },
+    );
+
     //Now the texts, lives & such (UI)
     this.scoreText = this.add.text(2, 2, "Score: 0", {
       fontFamily: '"Press Start 2P"',
@@ -41,7 +57,7 @@ export class Game extends Phaser.Scene {
       color: "#ffffff",
       align: "left",
     });
-    this.LivesText = this.add.text(90, 2, "Lives: 3", {
+    this.LivesText = this.add.text(160, 2, "Lives: 3", {
       fontFamily: '"Press Start 2P"',
       fontSize: "8px",
       color: "#ffffff",
@@ -127,6 +143,9 @@ export class Game extends Phaser.Scene {
       this,
     );
 
+    // Collectable collision (fruit/bonus items)
+    this.collectableGroup = this.physics.add.group();
+
     // Setup dot collection
     this.dotManager.setupCollision(
       this.player,
@@ -134,6 +153,12 @@ export class Game extends Phaser.Scene {
         this.dotManager.removeDot(dot);
         this.gameManager.addScore(10);
         this.scoreText.setText("Score: " + this.gameManager.getScore());
+        // Play power-up sound at full volume
+        const powerSound = this.sound.add("playerEatPower", {
+          loop: false,
+          volume: 1.0,
+        });
+        powerSound.play();
         this.checkWinCondition();
       },
       (player, dot) => {
@@ -158,11 +183,39 @@ export class Game extends Phaser.Scene {
     this.input.once("pointerdown", () => {
       this.scene.start("MainMenu");
     });
+
+    // Play startGame sound - doesn't block, cuts off if scene changes
+    this.startGameSound = this.sound.add("startGame", { loop: false });
+    this.startGameSound.play();
+
+    // Setup sound cleanup on scene shutdown
+    this.events.once("shutdown", () => {
+      if (this.player && this.player.walkSound) {
+        this.player.walkSound.stop();
+      }
+      // Stop startGame sound if scene changes before it finishes
+      if (this.startGameSound && this.startGameSound.isPlaying) {
+        this.startGameSound.stop();
+      }
+    });
+
+    // Listen for power-up expiry to stop frightened sounds
+    this.events.on("powered-end", () => {
+      this.blinky.unfrighten();
+      this.pinky.unfrighten();
+      this.inky.unfrighten();
+      this.sue.unfrighten();
+    });
   }
 
   update(time, delta) {
     if (this.player) {
       this.player.handleMovement(delta, this.cursors, this.wallLayer);
+    }
+
+    // Update collectable movement
+    if (this.currentCollectable && this.currentCollectable.isActive) {
+      this.currentCollectable.update(time, delta);
     }
 
     // Check if any eaten ghosts have reached their spawn point
@@ -175,6 +228,14 @@ export class Game extends Phaser.Scene {
   handleGhostCollision(player, ghost) {
     // If ghost is frightened, eat it (add 200 points, send to spawn)
     if (ghost.isFrightened()) {
+      // Play enemy eaten sound at full volume
+      const eatEnemySound = this.sound.add("playerEatEnemy", {
+        loop: false,
+        volume: 1.0,
+      });
+      eatEnemySound.play();
+      this.gameManager.addScore(200);
+      this.scoreText.setText("Score: " + this.gameManager.getScore());
       ghost.eat();
       return;
     }
@@ -192,6 +253,19 @@ export class Game extends Phaser.Scene {
    * Handle player being caught by a ghost
    */
   handlePlayerCaught() {
+    // Despawn any active collectable
+    if (this.currentCollectable && this.currentCollectable.isActive) {
+      this.currentCollectable.despawn();
+      this.currentCollectable = null;
+    }
+
+    // Play player death sound - doesn't block, just plays
+    const deathSound = this.sound.add("playerDeath", {
+      loop: false,
+      volume: 0.2,
+    });
+    deathSound.play();
+
     // Decrease lives
     this.gameManager.loseLives();
     this.LivesText.setText("Lives: " + this.gameManager.getLives());
@@ -282,6 +356,81 @@ export class Game extends Phaser.Scene {
     if (this.dotManager.isComplete()) {
       this.scene.start("MainMenu");
     }
+  }
+
+  /**
+   * Spawn a collectable (fruit/bonus item)
+   */
+  spawnCollectable() {
+    // Don't spawn if one is already on screen
+    if (this.currentCollectable && this.currentCollectable.isOnScreen()) {
+      return;
+    }
+
+    // Define collectable paths (waypoints for movement through maze)
+    // These are hardcoded paths specific to the maze layout
+    const collectablePaths = {
+      // Entry: from left tunnel to center chamber
+      entry: [
+        { x: 0, y: 140 }, // Left tunnel
+        { x: 52, y: 140 },
+        { x: 52, y: 116 },
+        { x: 78, y: 116 },
+        { x: 78, y: 140 }, // Approaching center
+      ],
+      // Lap: clockwise around the ghost house center
+      lap: [
+        { x: 112, y: 140 }, // Bottom of chamber
+        { x: 78, y: 140 }, // Bottom right
+        { x: 78, y: 92 }, // Top right
+        { x: 150, y: 92 }, // Top left
+        { x: 150, y: 140 }, // Bottom left
+        { x: 112, y: 140 }, // Back to center
+      ],
+      // Exit: from center to right tunnel
+      exit: [
+        { x: 150, y: 140 },
+        { x: 150, y: 116 },
+        { x: 176, y: 116 },
+        { x: 176, y: 140 },
+        { x: 248, y: 140 }, // Right tunnel exit
+      ],
+    };
+
+    // Choose random collectable type (for variety)
+    const types = ["holyWater", "crucifix", "stake"];
+    const type = types[Math.floor(Math.random() * types.length)];
+
+    // Create collectable at left tunnel entrance
+    const collectable = new Collectable(this, 0, 124, type, collectablePaths);
+    collectable.init("left");
+
+    this.currentCollectable = collectable;
+
+    // Setup collision with player
+    this.physics.add.overlap(
+      this.player,
+      collectable,
+      this.handleCollectableCollision,
+      null,
+      this,
+    );
+  }
+
+  /**
+   * Handle player collision with collectable
+   */
+  handleCollectableCollision(player, collectable) {
+    // Play eat collectable sound at full volume
+    const eatSound = this.sound.add("eatCollectable", {
+      loop: false,
+      volume: 1.0,
+    });
+    eatSound.play();
+    const score = collectable.collect();
+    this.gameManager.addScore(score);
+    this.scoreText.setText("Score: " + this.gameManager.getScore());
+    this.currentCollectable = null;
   }
 
   counstScore() {}
