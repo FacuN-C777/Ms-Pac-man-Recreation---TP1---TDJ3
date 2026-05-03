@@ -11,7 +11,7 @@ import { AUTO, Game } from "phaser";
 const config = {
   type: Phaser.AUTO,
   width: 224,
-  height: 248,
+  height: 256,
   parent: "game-container",
   backgroundColor: "#000000",
   pixelArt: true,

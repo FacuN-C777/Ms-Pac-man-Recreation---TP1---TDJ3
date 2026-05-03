@@ -51,13 +51,13 @@ export class Game extends Phaser.Scene {
     );
 
     //Now the texts, lives & such (UI)
-    this.scoreText = this.add.text(2, 2, "Score: 0", {
+    this.scoreText = this.add.text(2, 248, "SCORE: 0", {
       fontFamily: '"Press Start 2P"',
       fontSize: "8px",
       color: "#ffffff",
       align: "left",
     });
-    this.LivesText = this.add.text(160, 2, "Lives: 3", {
+    this.LivesText = this.add.text(160, 248, "LIVES: 3", {
       fontFamily: '"Press Start 2P"',
       fontSize: "8px",
       color: "#ffffff",
@@ -152,13 +152,13 @@ export class Game extends Phaser.Scene {
       (player, dot) => {
         this.dotManager.removeDot(dot);
         this.gameManager.addScore(10);
-        this.scoreText.setText("Score: " + this.gameManager.getScore());
+        this.scoreText.setText("SCORE: " + this.gameManager.getScore());
         this.checkWinCondition();
       },
       (player, dot) => {
         this.dotManager.removeDot(dot);
         this.gameManager.addScore(50);
-        this.scoreText.setText("Score: " + this.gameManager.getScore());
+        this.scoreText.setText("SCORE: " + this.gameManager.getScore());
         // Play power-up sound at full volume
         const powerSound = this.sound.add("playerEatPower", {
           loop: false,
@@ -196,6 +196,19 @@ export class Game extends Phaser.Scene {
       // Stop startGame sound if scene changes before it finishes
       if (this.startGameSound && this.startGameSound.isPlaying) {
         this.startGameSound.stop();
+      }
+      // Stop ghost sounds
+      if (this.blinky && this.blinky.currentStateSound) {
+        this.blinky.currentStateSound.stop();
+      }
+      if (this.pinky && this.pinky.currentStateSound) {
+        this.pinky.currentStateSound.stop();
+      }
+      if (this.inky && this.inky.currentStateSound) {
+        this.inky.currentStateSound.stop();
+      }
+      if (this.sue && this.sue.currentStateSound) {
+        this.sue.currentStateSound.stop();
       }
     });
 
@@ -235,7 +248,7 @@ export class Game extends Phaser.Scene {
       });
       eatEnemySound.play();
       this.gameManager.addScore(200);
-      this.scoreText.setText("Score: " + this.gameManager.getScore());
+      this.scoreText.setText("SCORE: " + this.gameManager.getScore());
       ghost.eat();
       return;
     }
@@ -268,7 +281,7 @@ export class Game extends Phaser.Scene {
 
     // Decrease lives
     this.gameManager.loseLives();
-    this.LivesText.setText("Lives: " + this.gameManager.getLives());
+    this.LivesText.setText("LIVES: " + this.gameManager.getLives());
 
     // Check if game over
     if (this.gameManager.playerLives <= 0) {
@@ -429,7 +442,7 @@ export class Game extends Phaser.Scene {
     eatSound.play();
     const score = collectable.collect();
     this.gameManager.addScore(score);
-    this.scoreText.setText("Score: " + this.gameManager.getScore());
+    this.scoreText.setText("SCORE: " + this.gameManager.getScore());
     this.currentCollectable = null;
   }
 
