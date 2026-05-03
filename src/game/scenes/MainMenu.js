@@ -22,9 +22,9 @@ export class MainMenu extends Scene {
       .setOrigin(0.5);
 
     this.level1Button = this.add
-      .text(112, 160, "Level 1 - Easy", {
+      .text(112, 120, "Level 1 - Easy", {
         fontFamily: '"Press Start 2P"',
-        fontSize: "8px",
+        fontSize: "12px",
         color: "#ffffff",
         align: "center",
       })
@@ -32,14 +32,31 @@ export class MainMenu extends Scene {
       .setInteractive({ useHandCursor: true });
 
     this.level2Button = this.add
-      .text(112, 200, "Level 2 - Hard", {
+      .text(112, 160, "Level 2 - Hard", {
         fontFamily: '"Press Start 2P"',
-        fontSize: "8px",
+        fontSize: "12px",
         color: "#ffffff",
         align: "center",
       })
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
+
+    this.WinConditionText = this.add
+      .text(112, 228, "Collect all dots to win", {
+        fontFamily: '"Press Start 2P"',
+        fontSize: "8px",
+        color: "#00fae5",
+        align: "center",
+      })
+      .setOrigin(0.5);
+    this.movementHintText = this.add
+      .text(112, 240, "Tip: Use arrow keys to move", {
+        fontFamily: '"Press Start 2P"',
+        fontSize: "8px",
+        color: "#00fae5",
+        align: "center",
+      })
+      .setOrigin(0.5);
 
     // Track selected button (0 = Level 1, 1 = Level 2)
     this.selectedLevel = 0;
